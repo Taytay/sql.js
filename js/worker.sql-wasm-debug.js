@@ -931,12 +931,8 @@ Module['postRun'] = [];
 
 var ENVIRONMENT_IS_WEB = false;
 var ENVIRONMENT_IS_WORKER = false;
-var ENVIRONMENT_IS_NODE = false;
+var ENVIRONMENT_IS_NODE = true;
 var ENVIRONMENT_IS_SHELL = false;
-ENVIRONMENT_IS_WEB = typeof window === 'object';
-ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
-ENVIRONMENT_IS_NODE = typeof process === 'object' && typeof require === 'function' && !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_WORKER;
-ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_WORKER;
 
 
 // Three configurations we can be running in:
@@ -1005,88 +1001,6 @@ if (ENVIRONMENT_IS_NODE) {
   };
 
   Module['inspect'] = function () { return '[Emscripten Module object]'; };
-} else
-if (ENVIRONMENT_IS_SHELL) {
-
-
-  if (typeof read != 'undefined') {
-    Module['read'] = function shell_read(f) {
-      return read(f);
-    };
-  }
-
-  Module['readBinary'] = function readBinary(f) {
-    var data;
-    if (typeof readbuffer === 'function') {
-      return new Uint8Array(readbuffer(f));
-    }
-    data = read(f, 'binary');
-    assert(typeof data === 'object');
-    return data;
-  };
-
-  if (typeof scriptArgs != 'undefined') {
-    Module['arguments'] = scriptArgs;
-  } else if (typeof arguments != 'undefined') {
-    Module['arguments'] = arguments;
-  }
-
-  if (typeof quit === 'function') {
-    Module['quit'] = function(status) {
-      quit(status);
-    }
-  }
-} else
-if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
-  if (ENVIRONMENT_IS_WORKER) { // Check worker, not web, since window could be polyfilled
-    scriptDirectory = self.location.href;
-  } else if (document.currentScript) { // web
-    scriptDirectory = document.currentScript.src;
-  }
-  // blob urls look like blob:http://site.com/etc/etc and we cannot infer anything from them.
-  // otherwise, slice off the final part of the url to find the script directory.
-  // if scriptDirectory does not contain a slash, lastIndexOf will return -1,
-  // and scriptDirectory will correctly be replaced with an empty string.
-  if (scriptDirectory.indexOf('blob:') !== 0) {
-    scriptDirectory = scriptDirectory.substr(0, scriptDirectory.lastIndexOf('/')+1);
-  } else {
-    scriptDirectory = '';
-  }
-
-
-  Module['read'] = function shell_read(url) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', url, false);
-      xhr.send(null);
-      return xhr.responseText;
-  };
-
-  if (ENVIRONMENT_IS_WORKER) {
-    Module['readBinary'] = function readBinary(url) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, false);
-        xhr.responseType = 'arraybuffer';
-        xhr.send(null);
-        return new Uint8Array(xhr.response);
-    };
-  }
-
-  Module['readAsync'] = function readAsync(url, onload, onerror) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.onload = function xhr_onload() {
-      if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
-        onload(xhr.response);
-        return;
-      }
-      onerror();
-    };
-    xhr.onerror = onerror;
-    xhr.send(null);
-  };
-
-  Module['setWindowTitle'] = function(title) { document.title = title };
 } else
 {
 }
@@ -2577,7 +2491,7 @@ var ASM_CONSTS = [];
 
 STATIC_BASE = GLOBAL_BASE;
 
-STATICTOP = STATIC_BASE + 49408;
+STATICTOP = STATIC_BASE + 49968;
 /* global initializers */  __ATINIT__.push({ func: function() { ___emscripten_environ_constructor() } });
 
 
@@ -2586,7 +2500,7 @@ STATICTOP = STATIC_BASE + 49408;
 
 
 
-var STATIC_BUMP = 49408;
+var STATIC_BUMP = 49968;
 Module["STATIC_BASE"] = STATIC_BASE;
 Module["STATIC_BUMP"] = STATIC_BUMP;
 
@@ -6187,10 +6101,6 @@ function copyTempDouble(ptr) {
   return _llvm_log10_f32.apply(null, arguments)
   }
 
-  function _llvm_trap() {
-      abort('trap!');
-    }
-
   
   var ___tm_current=STATICTOP; STATICTOP += 48;;
   
@@ -6799,7 +6709,7 @@ function jsCall_viji(index,a1,a2,a3) {
 
 Module.asmGlobalArg = {};
 
-Module.asmLibraryArg = { "abort": abort, "assert": assert, "enlargeMemory": enlargeMemory, "getTotalMemory": getTotalMemory, "abortOnCannotGrowMemory": abortOnCannotGrowMemory, "invoke_i": invoke_i, "jsCall_i": jsCall_i, "invoke_ii": invoke_ii, "jsCall_ii": jsCall_ii, "invoke_iii": invoke_iii, "jsCall_iii": jsCall_iii, "invoke_iiii": invoke_iiii, "jsCall_iiii": jsCall_iiii, "invoke_iiiii": invoke_iiiii, "jsCall_iiiii": jsCall_iiiii, "invoke_iiiiii": invoke_iiiiii, "jsCall_iiiiii": jsCall_iiiiii, "invoke_iiiiiii": invoke_iiiiiii, "jsCall_iiiiiii": jsCall_iiiiiii, "invoke_iiiij": invoke_iiiij, "jsCall_iiiij": jsCall_iiiij, "invoke_iij": invoke_iij, "jsCall_iij": jsCall_iij, "invoke_iiji": invoke_iiji, "jsCall_iiji": jsCall_iiji, "invoke_iijii": invoke_iijii, "jsCall_iijii": jsCall_iijii, "invoke_vi": invoke_vi, "jsCall_vi": jsCall_vi, "invoke_vii": invoke_vii, "jsCall_vii": jsCall_vii, "invoke_viii": invoke_viii, "jsCall_viii": jsCall_viii, "invoke_viiii": invoke_viiii, "jsCall_viiii": jsCall_viiii, "invoke_viiiij": invoke_viiiij, "jsCall_viiiij": jsCall_viiiij, "invoke_viij": invoke_viij, "jsCall_viij": jsCall_viij, "invoke_viji": invoke_viji, "jsCall_viji": jsCall_viji, "___assert_fail": ___assert_fail, "___buildEnvironment": ___buildEnvironment, "___setErrNo": ___setErrNo, "___syscall10": ___syscall10, "___syscall118": ___syscall118, "___syscall140": ___syscall140, "___syscall15": ___syscall15, "___syscall183": ___syscall183, "___syscall192": ___syscall192, "___syscall194": ___syscall194, "___syscall195": ___syscall195, "___syscall196": ___syscall196, "___syscall197": ___syscall197, "___syscall20": ___syscall20, "___syscall201": ___syscall201, "___syscall202": ___syscall202, "___syscall207": ___syscall207, "___syscall212": ___syscall212, "___syscall221": ___syscall221, "___syscall3": ___syscall3, "___syscall33": ___syscall33, "___syscall39": ___syscall39, "___syscall4": ___syscall4, "___syscall40": ___syscall40, "___syscall5": ___syscall5, "___syscall6": ___syscall6, "___syscall85": ___syscall85, "___syscall91": ___syscall91, "___syscall94": ___syscall94, "_emscripten_memcpy_big": _emscripten_memcpy_big, "_getenv": _getenv, "_gettimeofday": _gettimeofday, "_llvm_ceil_f64": _llvm_ceil_f64, "_llvm_floor_f64": _llvm_floor_f64, "_llvm_log10_f32": _llvm_log10_f32, "_llvm_log10_f64": _llvm_log10_f64, "_llvm_trap": _llvm_trap, "_localtime": _localtime, "_localtime_r": _localtime_r, "_nanosleep": _nanosleep, "_sysconf": _sysconf, "_time": _time, "_tzset": _tzset, "_usleep": _usleep, "_utimes": _utimes, "DYNAMICTOP_PTR": DYNAMICTOP_PTR, "tempDoublePtr": tempDoublePtr, "STACKTOP": STACKTOP, "STACK_MAX": STACK_MAX };
+Module.asmLibraryArg = { "abort": abort, "assert": assert, "enlargeMemory": enlargeMemory, "getTotalMemory": getTotalMemory, "abortOnCannotGrowMemory": abortOnCannotGrowMemory, "invoke_i": invoke_i, "jsCall_i": jsCall_i, "invoke_ii": invoke_ii, "jsCall_ii": jsCall_ii, "invoke_iii": invoke_iii, "jsCall_iii": jsCall_iii, "invoke_iiii": invoke_iiii, "jsCall_iiii": jsCall_iiii, "invoke_iiiii": invoke_iiiii, "jsCall_iiiii": jsCall_iiiii, "invoke_iiiiii": invoke_iiiiii, "jsCall_iiiiii": jsCall_iiiiii, "invoke_iiiiiii": invoke_iiiiiii, "jsCall_iiiiiii": jsCall_iiiiiii, "invoke_iiiij": invoke_iiiij, "jsCall_iiiij": jsCall_iiiij, "invoke_iij": invoke_iij, "jsCall_iij": jsCall_iij, "invoke_iiji": invoke_iiji, "jsCall_iiji": jsCall_iiji, "invoke_iijii": invoke_iijii, "jsCall_iijii": jsCall_iijii, "invoke_vi": invoke_vi, "jsCall_vi": jsCall_vi, "invoke_vii": invoke_vii, "jsCall_vii": jsCall_vii, "invoke_viii": invoke_viii, "jsCall_viii": jsCall_viii, "invoke_viiii": invoke_viiii, "jsCall_viiii": jsCall_viiii, "invoke_viiiij": invoke_viiiij, "jsCall_viiiij": jsCall_viiiij, "invoke_viij": invoke_viij, "jsCall_viij": jsCall_viij, "invoke_viji": invoke_viji, "jsCall_viji": jsCall_viji, "___assert_fail": ___assert_fail, "___buildEnvironment": ___buildEnvironment, "___setErrNo": ___setErrNo, "___syscall10": ___syscall10, "___syscall118": ___syscall118, "___syscall140": ___syscall140, "___syscall15": ___syscall15, "___syscall183": ___syscall183, "___syscall192": ___syscall192, "___syscall194": ___syscall194, "___syscall195": ___syscall195, "___syscall196": ___syscall196, "___syscall197": ___syscall197, "___syscall20": ___syscall20, "___syscall201": ___syscall201, "___syscall202": ___syscall202, "___syscall207": ___syscall207, "___syscall212": ___syscall212, "___syscall221": ___syscall221, "___syscall3": ___syscall3, "___syscall33": ___syscall33, "___syscall39": ___syscall39, "___syscall4": ___syscall4, "___syscall40": ___syscall40, "___syscall5": ___syscall5, "___syscall6": ___syscall6, "___syscall85": ___syscall85, "___syscall91": ___syscall91, "___syscall94": ___syscall94, "_emscripten_memcpy_big": _emscripten_memcpy_big, "_getenv": _getenv, "_gettimeofday": _gettimeofday, "_llvm_ceil_f64": _llvm_ceil_f64, "_llvm_floor_f64": _llvm_floor_f64, "_llvm_log10_f32": _llvm_log10_f32, "_llvm_log10_f64": _llvm_log10_f64, "_localtime": _localtime, "_localtime_r": _localtime_r, "_nanosleep": _nanosleep, "_sysconf": _sysconf, "_time": _time, "_tzset": _tzset, "_usleep": _usleep, "_utimes": _utimes, "DYNAMICTOP_PTR": DYNAMICTOP_PTR, "tempDoublePtr": tempDoublePtr, "STACKTOP": STACKTOP, "STACK_MAX": STACK_MAX };
 // EMSCRIPTEN_START_ASM
 var asm =Module["asm"]// EMSCRIPTEN_END_ASM
 (Module.asmGlobalArg, Module.asmLibraryArg, buffer);
