@@ -1,4 +1,4 @@
-# Note: Last built with version emscripten-1.38.31 of Emscripten
+# Note: Last built with version 1.38.31 of Emscripten
 
 # TODO: Emit a file showing which version of emcc and SQLite was used to compile the emitted output.
 # TODO: Create a release on Github with these compiled assets rather than checking them in
@@ -17,6 +17,7 @@ EXTENSION_FUNCTIONS_SHA1 = c68fa706d6d9ff98608044c00212473f9c14892f
 
 EMCC=emcc
 
+# TODO: move these settings into a header file to make them easier to add comments to
 SQLITE_COMPILATION_FLAGS= \
 	-DSQLITE_OMIT_LOAD_EXTENSION \
 	-DSQLITE_DISABLE_LFS \
@@ -46,7 +47,7 @@ SQLITE_COMPILATION_FLAGS= \
 	#-DSQLITE_ENABLE_JSON1=0 \
 
 # When compiling to WASM, enabling memory-growth is not expected to make much of an impact, so we enable it for all builds
-# Since tihs is a library and not a standalone executable, we don't want to catch unhandled Node process exceptions
+# Since this is a library and not a standalone executable, we don't want to catch unhandled Node process exceptions
 # So, we do : `NODEJS_CATCH_EXIT=0`, which fixes issue: https://github.com/kripken/sql.js/issues/173 and https://github.com/kripken/sql.js/issues/262
 EMFLAGS = \
 	--memory-init-file 0 \
