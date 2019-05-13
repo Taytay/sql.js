@@ -26,15 +26,15 @@ exports.test = function(sql, assert){
                      [{columns:['letter', 'code'], values:[['a',1],['b',2.2],['c',null]]}],
                             "Statement.run() should have added data to the database");
 
-    db.run("CREATE TABLE data (nbr, str, nothing); INSERT INTO data VALUES (5, '粵語😄', NULL);");
+    db.run("CREATE TABLE data (nbr, str, no_value); INSERT INTO data VALUES (5, '粵語😄', NULL);");
     stmt = db.prepare("SELECT * FROM data");
     stmt.step(); // Run the statement
-    assert.deepEqual(stmt.getColumnNames(), ['nbr','str','nothing'], 'Statement.GetColumnNames()');
+    assert.deepEqual(stmt.getColumnNames(), ['nbr','str','no_value'], 'Statement.GetColumnNames()');
     var res = stmt.getAsObject();
     assert.strictEqual(res.nbr, 5, 'Read number');
     assert.strictEqual(res.str, '粵語😄', "Read string");
-    assert.strictEqual(res.nothing, null, "Read null");
-    assert.deepEqual(res, {nbr:5, str:'粵語😄', nothing:null}, "Statement.getAsObject()");
+    assert.strictEqual(res.no_value, null, "Read null");
+    assert.deepEqual(res, {nbr:5, str:'粵語😄', no_value:null}, "Statement.getAsObject()");
     stmt.free();
 
 
@@ -71,7 +71,7 @@ exports.test = function(sql, assert){
 
 if (module == require.main) {
 	const target_file = process.argv[2];
-  const sql_loader = require('./load_sql_file');
+  const sql_loader = require('./load_sql_lib');
   sql_loader(target_file).then((sql)=>{
     require('test').run({
       'test statement': function(assert){

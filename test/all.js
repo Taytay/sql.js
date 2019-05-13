@@ -1,9 +1,9 @@
 var fs = require("fs");
 Error.stackTraceLimit = 200;
-var target = process.argv[2];
-var file = target ? "../js/sql-"+target+".js" : "../js/sql.js";
-var sqlModule = require(file);
-sqlModule.ready.then((sql)=>{
+var sqlLibType = process.argv[2];
+const sqlLibLoader = require('./load_sql_lib');
+
+sqlLibLoader(sqlLibType).then((sql)=>{
   var files = fs.readdirSync(__dirname);
   for (var i=0; i<files.length; i++) {
     var file = files[i];
