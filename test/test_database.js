@@ -1,9 +1,9 @@
-exports.test = function(sql, assert, done) {
-  assert.notEqual(sql.Database, undefined, "Should export a Database object");
+exports.test = function(SQL, assert, done) {
+  assert.notEqual(SQL.Database, undefined, "Should export a Database object");
 
   // Create a database
-  var db = new sql.Database();
-  assert.equal(Object.getPrototypeOf(db), sql.Database.prototype, "Creating a database object");
+  var db = new SQL.Database();
+  assert.equal(Object.getPrototypeOf(db), SQL.Database.prototype, "Creating a database object");
 
   // Execute some sql
   sqlstr = "CREATE TABLE test (a, b, c, d, e);";
@@ -50,18 +50,31 @@ exports.test = function(sql, assert, done) {
   }, function last () {
     finished = true;
     assert.strictEqual(count, 2, "db.each returns the right number of rows");
+    // No need to wait for this timeout anymore
+    // In fact, if we do keep waiting for this, we'll get an error when it fires because we've already called done
+    clearTimeout(testTimeoutId);
     done();
   });
-  var timeout = setTimeout(function timeout(){
-    assert.strictEqual(finished, true,
-                       "db.each should call its last callback after having returned the rows");
-    done();
+  var testTimeoutId = setTimeout(function timeout(){
+    if (!finished) {
+      assert.fail("db.each should call its last callback after having returned the rows");
+      done();
+    }
   }, 3000);
 };
 
 if (module == require.main) {
-  var sql = require('../js/sql.js');
-  var assert = require('assert');
-  var done = function(){process.exit();}
-  exports.test(sql, assert, done);
+	const target_file = process.argv[2];
+  const sql_loader = require('./load_sql_lib');
+  sql_loader(target_file).then((sql)=>{
+    require('test').run({
+      'test database': function(assert, done){
+        exports.test(sql, assert, done);
+      }
+    });
+  })
+  .catch((e)=>{
+    console.error(e);
+    assert.fail(e);
+  });
 }

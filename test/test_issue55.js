@@ -1,4 +1,4 @@
-exports.test = function(sql, assert) {
+exports.test = function(SQL, assert) {
   var fs = require('fs');
   var path = require('path');
 
@@ -14,15 +14,24 @@ exports.test = function(sql, assert) {
   var count = db.prepare("SELECT COUNT(*) AS count FROM networklocation").getAsObject({}).count;
 
   assert.equal(count, origCount + 1, "The row has been inserted");
-  var dbCopy = new sql.Database(db.export());
+  var dbCopy = new SQL.Database(db.export());
   var newCount = dbCopy.prepare("SELECT COUNT(*) AS count FROM networklocation").getAsObject({}).count;
   assert.equal(newCount, count, "export and reimport copies all the data");
 };
 
 if (module == require.main) {
-  var sql = require('../js/sql.js');
-  var assert = require('assert');
-  var done = function(){process.exit();}
-
-  exports.test(sql, assert, done);
+	const target_file = process.argv[2];
+  const sql_loader = require('./load_sql_lib');
+  sql_loader(target_file).then((sql)=>{
+    require('test').run({
+      'test issue 55': function(assert){
+        exports.test(sql, assert);
+      }
+    });
+  })
+  .catch((e)=>{
+    console.error(e);
+    assert.fail(e);
+  });
 }
+
