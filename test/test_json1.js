@@ -87,7 +87,9 @@ exports.test = function(sql, assert) {
         String(db.exec(
             "SELECT " + sql.split(" = ")[0] + " AS val;"
         )[0].values[0][0]),
-        String(sql.split(" = ")[1].replace(/'/g, ""))
+        String(sql.split(" = ")[1].replace(/'/g, "")),
+        // We use the sql string as the message parameter because otherwise each test is called "undefined" in the test output
+        sql
     );
   });
 };
